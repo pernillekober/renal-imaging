@@ -161,9 +161,9 @@ def load_nifti_img_and_mask_as_numpy(paths_list, subsample_list):
     image_dict = {}
 
     for img_path in paths_list:
-        case_id = img_path[-17:-7]
+        case_id = img_path[-14:-4]
         if case_id in subsample_list:
-            ct_nii = nib.load(img_path).get_fdata()
+            ct_nii = np.load(img_path)
             image_dict[case_id] = ct_nii
     
     return image_dict

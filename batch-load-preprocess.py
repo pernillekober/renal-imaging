@@ -92,11 +92,10 @@ def load_nifti_img_and_mask_as_numpy(paths_list):
 
     for img_path in paths_list:
         case_id = img_path[22:32]
-        ct_nii = nib.load(img_path).get_fdata()
+        ct_nii = np.load(img_path)
         image_dict[case_id] = ct_nii
     
     return image_dict
-
 
 #print(len(image_case_dict) == len(mask_case_dict))
 
@@ -144,7 +143,7 @@ def image_preprocessing(dictionary_3D_images):
         image_list = []
         
         for img in value:
-            img_downsampled = cv2.resize(img, dsize=(224, 224)) #128x128 -> 224x224 -> 32*?
+            img_downsampled = cv2.resize(img, dsize=(128, 128)) #128x128 -> 224x224 -> 32*?
             normalized_image = cv2.normalize(img_downsampled, None, 0, 1, cv2.NORM_MINMAX)
             
             image_list.append(normalized_image)
@@ -171,8 +170,9 @@ def save_images(dir_name, img_dict):
     
     for key, value in img_dict.items():    
         print(key, value.shape)
-        ni_img = nib.Nifti1Image(value, affine=np.eye(4))
-        nib.save(ni_img, prep_folder +'/'+ dir_name + '/' + key + '.nii.gz')      
+        np.save(prep_folder +'/'+ dir_name + '/' + key + '.npy', value)
+#         ni_img = nib.Nifti1Image(value, affine=np.eye(4))
+#         nib.save(ni_img, prep_folder +'/'+ dir_name + '/' + key + '.nii.gz')      
     
     return None
 
@@ -254,10 +254,11 @@ test = ct_nii[40,:,:]
 plt.imshow(test)
 
 
+
 # In[ ]:
 
 
-ct_nii = nib.load('./preprocessed-data/images/case_00011.nii.gz').get_fdata()
+ct_nii = np.load('./preprocessed-data/images/case_00011.npy')
 print(ct_nii.shape)
 test = ct_nii[40,:,:]
 plt.imshow(test)
@@ -266,7 +267,7 @@ plt.imshow(test)
 # In[ ]:
 
 
-ct_nii = nib.load('./preprocessed-data/images/case_00070.nii.gz').get_fdata()
+ct_nii = np.load('./preprocessed-data/images/case_00070.npy')
 print(ct_nii.shape)
 test = ct_nii[40,:,:]
 plt.imshow(test)
@@ -275,7 +276,7 @@ plt.imshow(test)
 # In[ ]:
 
 
-ct_nii = nib.load('./preprocessed-data/images/case_00184.nii.gz').get_fdata()
+ct_nii = np.load('./preprocessed-data/images/case_00184.npy')
 print(ct_nii.shape)
 test = ct_nii[20,:,:]
 plt.imshow(test)
@@ -284,7 +285,7 @@ plt.imshow(test)
 # In[ ]:
 
 
-ct_nii = nib.load('./preprocessed-data/images/case_00299.nii.gz').get_fdata()
+ct_nii = np.load('./preprocessed-data/images/case_00299.npy')
 print(ct_nii.shape)
 test = ct_nii[20,:,:]
 plt.imshow(test)
