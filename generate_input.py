@@ -180,7 +180,7 @@ def split_sets(cases, labels, val_pct, test_pct):
     test_split = test_pct/temp_split
 
     id_train, id_test_temp, labels_train, labels_test_temp = train_test_split(
-        cases, labels, test_size=temp_split, shuffle=True, stratify=labels)
+        cases, labels, test_size=temp_split, shuffle=True, stratify=labels, random_state=42)
 
     id_val, id_test, labels_val, labels_test = train_test_split(
         id_test_temp, labels_test_temp, test_size=test_split, shuffle=True, random_state=42, stratify=labels_test_temp)
@@ -262,7 +262,7 @@ def generate_data_input(json_path, n_samples, neg_pct, rootdir, img_dir, mask_di
     x_train, x_val, x_test = adding_channel(x_train), adding_channel(x_val), adding_channel(x_test)
     print('After adding channels: ', x_train.shape, x_val.shape, x_test.shape)
     
-    return x_train, y_train, x_val, y_val, x_test, y_test
+    return x_train, y_train, x_val, y_val, x_test, y_test, id_val, id_test
 
 
 # In[16]:
