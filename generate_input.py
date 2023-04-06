@@ -150,6 +150,17 @@ def processed_image_paths(rootdir, subfolder):
             
     return paths_list
 
+def processed_partially_image_paths(rootdir, subfolder, list_of_cases):
+    """ Creates list of paths to images in each subfolder and corresponsing patient ID """
+    
+    folder_path = rootdir + subfolder
+    paths_list = []
+    for file in os.listdir(folder_path):
+        if file[:-4] in list_of_cases:
+            paths_list.append(folder_path + '/' + file)
+            
+    return paths_list
+
 
 # In[11]:
 
