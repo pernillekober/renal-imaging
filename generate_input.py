@@ -205,20 +205,25 @@ def split_sets(cases, labels, val_pct, test_pct):
 # In[13]:
 
 
-def fill_set(x_set, y_set, image_dictionary, label_dictionary):
+def fill_set(x_set, y_set, image_dictionary, label_dictionary, isLabels = False):
     x_list, y_list = [], []
-    
+    labels = []
     for idx, (x, y) in enumerate(zip(x_set, y_set)):  
         for img in image_dictionary[x]:
             x_list.append(img)
             y_list.append(label_dictionary[x])
+            
+            if isLabels == True:
+                labels.append(x)
     
     x_array, y_array = np.array(x_list), np.array(y_list).astype(int)
     
     #x_array = np.array(tf.expand_dims(x_array, -1))
     y_array = np.asarray(y_array).astype('float32').reshape((-1,1))
-    
-    return x_array, y_array
+    if isLabels == True:
+        return x_array, y_array, labels
+    else:
+        return x_array, y_array
 
 
 # In[14]:
