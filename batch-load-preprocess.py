@@ -9,15 +9,15 @@
 # jupyter notebook
 
 
+# In[ ]:
+
+
+#!pip install nibabel
+#!pip install matplotlib
+#!pip install opencv-python
+
+
 # In[1]:
-
-
-get_ipython().system('pip install nibabel')
-get_ipython().system('pip install matplotlib')
-get_ipython().system('pip install opencv-python')
-
-
-# In[3]:
 
 
 import numpy as np
@@ -53,13 +53,19 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 
 
-# In[4]:
+# In[2]:
 
 
 get_ipython().system("ls '../kits21/kits21/data/'")
 
 
-# In[5]:
+# In[3]:
+
+
+
+
+
+# In[4]:
 
 
 def generate_image_paths(rootdir_str, general_filename):
@@ -75,7 +81,7 @@ def generate_image_paths(rootdir_str, general_filename):
     return paths_list
 
 
-# In[6]:
+# In[5]:
 
 
 def load_nifti_img_and_mask_as_numpy(paths_list):
@@ -96,7 +102,7 @@ def load_nifti_img_and_mask_as_numpy(paths_list):
 #print(len(image_case_dict) == len(mask_case_dict))
 
 
-# In[7]:
+# In[6]:
 
 
 #identifying images to remove based on if they have kidney or tumor in the image.
@@ -126,33 +132,39 @@ def remove_images_without_kidney(dictionary_3D_images, dictionary_3D_masks):
     return dictionary_3D_images, dictionary_3D_masks
 
 
-# In[8]:
+# In[7]:
 
 
 #Preprocessing: downsample images and normalizing
 
-def image_preprocessing(dictionary_3D_images):
+def image_preprocessing(dictionary_3D_images, normalize = True ):
     """ Downsamples images and masks to 224x224 and normalize pixel values 
     to range of 0 to 1."""
     
     for key, value in dictionary_3D_images.items():
         image_list = []
+        print(np.unique(value))
         
         for img in value:
-            img_downsampled = cv2.resize(img, dsize=(128, 128)) #128x128 -> 224x224 -> 32*?
-            normalized_image = cv2.normalize(img_downsampled, None, 0, 1, cv2.NORM_MINMAX)
+            img_preprocessed = cv2.resize(img, dsize=(64, 64), interpolation = cv2.INTER_NEAREST) #128x128 -> 224x224 -> 32*?
             
-            image_list.append(normalized_image)
+            if normalize == True:
+                img_preprocessed = cv2.normalize(img_preprocessed, None, 0, 1, cv2.NORM_MINMAX)
+            image_list.append(img_preprocessed)
             
+       
+        #print("image list", np.unique(image_list))
+        
         dictionary_3D_images[key] = np.array(image_list)
+        #print("last in image", np.unique(dictionary_3D_images[key]))
         
     return dictionary_3D_images
 
 #images_dict_preprocessed = image_preprocessing(image_dict)
-#masks_dict_preprocessed = image_preprocessing(mask_dict)
+#masks_dict_preprocessed = image_preprocessing(mask_dict, False)
 
 
-# In[9]:
+# In[8]:
 
 
 def save_images(dir_name, img_dict):
@@ -164,8 +176,7 @@ def save_images(dir_name, img_dict):
     if not os.path.exists(prep_folder + '/' + dir_name):
         os.makedirs(prep_folder + '/' + dir_name)
     
-    for key, value in img_dict.items():    
-        print(key, value.shape)
+    for key, value in img_dict.items():
         #ni_img = nib.Nifti1Image(value, affine=np.eye(4))
         #nib.save(ni_img, prep_folder +'/'+ dir_name + '/' + key + '.nii.gz')      
         np.save(prep_folder +'/'+ dir_name + '/' + key + '.npy', value)
@@ -174,7 +185,7 @@ def save_images(dir_name, img_dict):
     return None
 
 
-# In[10]:
+# In[9]:
 
 
 def chunk_process_images(rootdir, image_str, mask_str, chunk_size):
@@ -198,8 +209,8 @@ def chunk_process_images(rootdir, image_str, mask_str, chunk_size):
         image_dict, mask_dict = remove_images_without_kidney(
             image_dict, mask_dict)
             
-        image_dict_preprocessed_sub = image_preprocessing(image_dict)
-        mask_dict_preprocessed_sub = image_preprocessing(mask_dict)
+        image_dict_preprocessed_sub = image_preprocessing(image_dict, normalize = True)
+        mask_dict_preprocessed_sub = image_preprocessing(mask_dict, normalize = False)
         
         save_images('images', image_dict_preprocessed_sub)
         save_images('masks', mask_dict_preprocessed_sub)
@@ -207,13 +218,13 @@ def chunk_process_images(rootdir, image_str, mask_str, chunk_size):
     return "Ran without error"
 
 
-# In[11]:
+# In[10]:
 
 
 #print(image_dict_preprocessed.keys())
 
 
-# In[12]:
+# In[11]:
 
 
 #img = image_dict_preprocessed['case_00141']
@@ -222,7 +233,7 @@ def chunk_process_images(rootdir, image_str, mask_str, chunk_size):
 #plt.imshow(test)
 
 
-# In[13]:
+# In[12]:
 
 
 # ----------- Creating image paths ----------
@@ -246,36 +257,57 @@ rootdir = '../kits21/kits21/data/'
 chunk_process_images(rootdir, '/imaging.nii.gz', '/aggregated_AND_seg.nii.gz', 10)
 
 
-# In[14]:
+# In[ ]:
 
 
 #save_numpy_as_nifti('images', images_dict_preprocessed)
 
 
-# In[15]:
+# In[ ]:
 
 
 get_ipython().system("ls './preprocessed-data/images/'")
 
 
-# In[16]:
+# In[ ]:
 
 
 get_ipython().system("ls '../kits21/kits21/data/case_00179/'")
 
 
-# In[17]:
+# In[16]:
 
 
-ct_nii = np.load('./preprocessed-data/images/case_00176.npy')
+ct_nii = np.load('./preprocessed-data/masks/case_00122.npy')
 print(ct_nii.shape)
+print(np.unique(ct_nii))
 test = ct_nii[10,:,:]
 plt.imshow(test)
 
 
-# ### Random test
+# In[3]:
+
+
+ct_nii = np.load('./preprocessed-data/images/case_00122.npy')
+print(ct_nii.shape)
+print(np.unique(ct_nii))
+test = ct_nii[10,:,:]
+plt.imshow(test)
+
 
 # In[18]:
+
+
+img = nib.load('../kits21/kits21/data/case_00122/aggregated_AND_seg.nii.gz')
+print(img.shape)
+data = img.get_fdata()
+print(np.unique(data))
+plt.imshow(data[27,:,:])
+
+
+# ### Random test
+
+# In[19]:
 
 
 img = nib.load('./preprocessed-data/images/case_00112.nii.gz')
@@ -309,7 +341,7 @@ resized_img = resize_image_stack_and_flip(data)
 print(resized_img.shape)
 
 
-# In[ ]:
+# In[20]:
 
 
 middle_slice = resized_img[:, :, resized_img.shape[-1] // 2 - 1]
@@ -335,7 +367,7 @@ print(xz_slice.shape)
 plt.imshow(xz_slice)
 
 
-# In[ ]:
+# In[4]:
 
 
 ct_nii = nib.load('./preprocessed-data/images/case_00140.nii.gz').get_fdata()
@@ -362,13 +394,19 @@ test = ct_nii[20,:,:]
 plt.imshow(test)
 
 
+# In[11]:
+
+
+ct_nii = nib.load('../kits21/kits21/data/case_00200/imaging.nii.gz').get_fdata()
+print(ct_nii.shape)
+test = ct_nii[40,:,:]
+plt.imshow(test, cmap = 'gray')
+
+
 # In[ ]:
 
 
-ct_nii = nib.load('../kits21/kits21/data/case_00179/aggregated_AND_seg.nii.gz').get_fdata()
-print(ct_nii.shape)
-test = ct_nii[40,:,:]
-plt.imshow(test)
+
 
 
 # In[ ]:
